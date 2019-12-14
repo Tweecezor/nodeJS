@@ -2,16 +2,6 @@ const fs = require('fs');
 const path = require('path');
 const del = require('del');
 
-
-// const rs = fs.createReadStream('./file.txt',{encoding:'utf8'});
-// const ws = fs.createWriteStream('./newFile.txt');
-
-// rs.on('data',data=>{
-//     console.log(data);
-// })
-
-
-
 var [ srcFolder ,newFolder, deleteStatus ] = process.argv.slice(2);
 
 
