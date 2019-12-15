@@ -1,9 +1,9 @@
 const fs = require('fs');
 const path = require('path');
 const del = require('del');
+const minimist = require('minimist');
 
-var [ srcFolder ,newFolder, deleteStatus ] = process.argv.slice(2);
-
+var  {srcFolder ,newFolder, deleteStatus}  = minimist(process.argv.slice(2));
 
 const _path = path.join(__dirname,srcFolder);
 
