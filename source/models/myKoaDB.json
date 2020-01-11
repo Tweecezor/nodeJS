@@ -1,0 +1,32 @@
+{
+  "products": [
+    {
+      "path": "/uploads/1D7C480E-8736-4899-9CE4-FC156FC73C0D.JPG",
+      "name": "mikcey ",
+      "price": "22"
+    },
+    {
+      "path": "/uploads/8e52a9b6f78fae1ad82e7ce707f05044.jpg",
+      "name": "bike",
+      "price": "234"
+    }
+  ],
+  "skills": {
+    "age": {
+      "number": "10",
+      "text": "Возраст начала занятий на скрипке"
+    },
+    "concerts": {
+      "number": "20",
+      "text": "Концертов отыграл"
+    },
+    "cities": {
+      "number": "30",
+      "text": "Максимальное число городов в туре"
+    },
+    "years": {
+      "number": "40",
+      "text": "Лет на сцене в качестве скрипача"
+    }
+  }
+}

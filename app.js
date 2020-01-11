@@ -1,40 +1,87 @@
-var express = require("express");
-var path = require("path");
-var app = express();
-var bodyParser = require("body-parser");
-var session = require("express-session");
-var fs = require("fs");
+const path = require("path");
+const Koa = require("koa");
+const fs = require("fs");
+const serve = require("koa-static");
+const Pug = require("koa-pug");
+const session = require("koa-session");
+// var Router = require("koa-router");
+// const router = new Router();
 
-app.set("views", path.join(__dirname, "source", "views"));
-app.set("view engine", "pug");
+const app = new Koa();
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+const pug = new Pug({
+  app: app,
+  viewPath: "./source/views",
+  basedir: "./source/views"
+});
 
+app.use(serve(path.join(__dirname, "public")));
 app.use(
-  session({
-    secret: "mySecretWord",
-    key: "sessionkey",
-    cookie: {
-      path: "/",
+  session(
+    {
+      key: "koa:sess",
+      maxAge: 10 * 60 * 1000,
+      autoCommit: true,
+      overwrite: true,
       httpOnly: true,
-      maxAge: 5 * 60 * 1000
+      // signed: true,
+      rolling: false,
+      renew: false
     },
-    saveUninitialized: false,
-    resave: false
-  })
+    app
+  )
 );
 
-app.use(express.static(path.join(__dirname, "public")));
+const router = require("./source/routes/index");
 
-app.use("/", require("./source/routes/index"));
+// router.get("/", async (ctx, next) => {
+//   return await ctx.render("views/pages/index");
+// });
 
-let upload = path.join("./public", "upload");
+app.use(router.routes());
 
-if (!fs.existsSync(upload)) {
-  fs.mkdirSync(upload);
-}
+let upload = path.join("./public", "uploads");
 
-const server = app.listen(3001, function() {
-  console.log("Сервер был запущен");
+app.listen(3000, function() {
+  if (!fs.existsSync(upload)) {
+    fs.mkdirSync(upload);
+  }
+  console.log("server is active");
 });
+
+// app.set("views", path.join(__dirname, "source", "views"));
+// app.set("view engine", "pug");
+
+// app.use(bodyParser.urlencoded({ extended: false }));
+// app.use(bodyParser.json());
+
+// app.use(
+//   session({
+//     secret: "mySecretWord",
+//     key: "sessionkey",
+//     cookie: {
+//       path: "/",
+//       httpOnly: true,
+//       maxAge: 5 * 60 * 1000
+//     },
+//     saveUninitialized: false,
+//     resave: false
+//   })
+// );
+
+// app.use(express.static(path.join(__dirname, "public")));
+
+// app.use("/", require("./source/routes/index"));
+
+// let upload = path.join("./public", "upload");
+
+// if (!fs.existsSync(upload)) {
+//   fs.mkdirSync(upload);
+// }
+
+// const server = app.listen(3001, function() {
+//   if (!fs.existsSync(upload)) {
+//     fs.mkdirSync(upload);
+//   }
+//   console.log("Сервер был запущен");
+// });
