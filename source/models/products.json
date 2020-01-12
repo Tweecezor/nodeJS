@@ -17,13 +17,17 @@
       "text": "Лет на сцене в качестве скрипача"
     }
   },
+  "user": {
+    "email": "test@mail.ru",
+    "pass": "123"
+  },
   "/upload/1D7C480E-8736-4899-9CE4-FC156FC73C0D.JPG": {
     "name": "mickey in flower",
     "price": "40"
   },
   "/upload/8e52a9b6f78fae1ad82e7ce707f05044.jpg": {
-    "name": "bike",
-    "price": "234"
+    "name": "Василий",
+    "price": "12324"
   },
   "/upload/3.png": {
     "name": "test",

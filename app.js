@@ -4,6 +4,7 @@ var app = express();
 var bodyParser = require("body-parser");
 var session = require("express-session");
 var fs = require("fs");
+var flash = require("connect-flash");
 
 app.set("views", path.join(__dirname, "source", "views"));
 app.set("view engine", "pug");
@@ -24,6 +25,7 @@ app.use(
     resave: false
   })
 );
+app.use(flash());
 
 app.use(express.static(path.join(__dirname, "public")));
 

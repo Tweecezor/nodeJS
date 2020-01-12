@@ -10,6 +10,7 @@ module.exports.get = function(req, res) {
   res.render("pages/admin", {
     title: "About",
     msgfile: req.query.msg,
+    msgskill: req.query.skill,
     skill: db.stores.file.store.skills
   });
 };
@@ -61,7 +62,7 @@ module.exports.skills = function(req, res, next) {
     //   text: "Лет на сцене в качестве скрипача"
     // });
     db.save();
-    res.redirect("/admin?msgs=Данные успешно обновлены");
+    res.redirect("/admin?skill=Данные успешно обновлены");
   });
 };
 
