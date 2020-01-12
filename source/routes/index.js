@@ -4,10 +4,11 @@ const router = new Router();
 const adminCTRL = require("../controller/admin");
 const indexCTRL = require("../controller/index");
 const loginCTRL = require("../controller/login");
-var koaBody = require("koa-body");
+const flash = require("koa-connect-flash");
+const koaBody = require("koa-body");
 
 const isLoged = async (ctx, next) => {
-  if (ctx.cookies.get("isLoged")) {
+  if (ctx.session.isLoged) {
     return await next();
   } else await ctx.redirect("/login");
 };

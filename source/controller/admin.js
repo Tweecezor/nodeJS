@@ -9,26 +9,8 @@ const rename = util.promisify(fs.rename);
 // const dbSkills = require("../models/skills-db")();
 const platform = process.platform;
 
-// module.exports.get = function(req, res) {
-//   res.render("pages/admin", {
-//     title: "About",
-//     msgfile: req.query.msg,
-//     skill: db.stores.file.store.skills
-//   });
-// };
 module.exports.get = async (ctx, next) => {
-  // console.log(ctx.cookies.get("isLoged"));
-  // console.log(db);
-  // db.get("skills")
-  //   .push({ age: 22, text: "text" })
-  //   .write();
-  // await db.defaults({ products: [], skills: [] });
-  // console.log(db.get("skills").value());
-  // db.get("skills")
-  //   .push({ id: 2 })
-  //   .write();
-  // console.log(db.get("skills").value());
-
+  console.log(ctx.params.skill);
   await ctx.render("pages/admin");
 };
 
@@ -54,9 +36,9 @@ module.exports.skills = async (ctx, next) => {
     number: ctx.request.body.years,
     text: "Лет на сцене в качестве скрипача"
   }).write();
-  await ctx.redirect("/admin?msgs=Данные успешно обновлены", {
-    msgskill: ctx.params.msgs
-  });
+  // ctx.request.flash("msgskill", "Данные успешно обновлены");
+  this.flash("msgskill", "Данные успешно обновлены");
+  await ctx.redirect("/admin");
 };
 
 module.exports.upload = async (ctx, next) => {
@@ -93,18 +75,6 @@ module.exports.upload = async (ctx, next) => {
     .write();
   await ctx.redirect("/admin?msg=Картинка успешно загружена");
 };
-
-// const validationProducts = (fields, files) => {
-//   // console.log(fields);
-//   // console.log(files);
-//   if (files.photo.name === "" || files.photo.size === 0) {
-//     return { status: "Не загружена картинка!", err: true };
-//   }
-//   if (!fields.name) {
-//     return { status: "Не указано описание картинки!", err: true };
-//   }
-//   return { status: "Ok", err: false };
-// };
 
 const validationSkills = fields => {
   if (!fields.age) {
