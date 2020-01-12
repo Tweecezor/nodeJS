@@ -9,23 +9,33 @@
       "path": "/uploads/8e52a9b6f78fae1ad82e7ce707f05044.jpg",
       "name": "bike",
       "price": "234"
+    },
+    {
+      "path": "/uploads/00442_pyrenees_1920x1200.jpg",
+      "name": "field",
+      "price": "765"
+    },
+    {
+      "path": "/uploads/00744_laclahachesunset_1920x1200.jpg",
+      "name": "lake",
+      "price": "234"
     }
   ],
   "skills": {
     "age": {
-      "number": "10",
+      "number": "22",
       "text": "Возраст начала занятий на скрипке"
     },
     "concerts": {
-      "number": "20",
+      "number": "22",
       "text": "Концертов отыграл"
     },
     "cities": {
-      "number": "30",
+      "number": "22",
       "text": "Максимальное число городов в туре"
     },
     "years": {
-      "number": "40",
+      "number": "22",
       "text": "Лет на сцене в качестве скрипача"
     }
   }

@@ -54,7 +54,9 @@ module.exports.skills = async (ctx, next) => {
     number: ctx.request.body.years,
     text: "Лет на сцене в качестве скрипача"
   }).write();
-  await ctx.redirect("/admin?msgs=Данные успешно обновлены");
+  await ctx.redirect("/admin?msgs=Данные успешно обновлены", {
+    msgskill: ctx.params.msgs
+  });
 };
 
 module.exports.upload = async (ctx, next) => {
@@ -65,33 +67,31 @@ module.exports.upload = async (ctx, next) => {
   let upload = path.join("./public", "uploads");
   const fileName = path.join(upload, ctx.request.files.photo.name);
   console.log(fileName);
-  rename(ctx.request.files.photo.path, fileName, async function(err) {
-    if (err) {
-      console.error(err.message);
-      return;
-    }
-    console.log(fileName);
-    let dir;
-    switch (platform) {
-      case "darwin":
-        dir = fileName.substr(fileName.indexOf("/"));
-        break;
-      case "win32":
-        dir = fileName.substr(fileName.indexOf("\\"));
-        break;
-      default:
-        dir = fileName.substr(fileName.indexOf("/"));
-    }
-    db.get("products")
-      .push({
-        path: dir,
-        name,
-        price
-      })
-      .write();
-    await ctx.redirect("/admin?msg=Картинка успешно загружена");
-  });
-  // });
+  const errorRename = await rename(ctx.request.files.photo.path, fileName);
+  if (errorRename) {
+    console.error("Ошибка при загрузке");
+    return;
+  }
+  console.log(fileName);
+  let dir;
+  switch (platform) {
+    case "darwin":
+      dir = fileName.substr(fileName.indexOf("/"));
+      break;
+    case "win32":
+      dir = fileName.substr(fileName.indexOf("\\"));
+      break;
+    default:
+      dir = fileName.substr(fileName.indexOf("/"));
+  }
+  db.get("products")
+    .push({
+      path: dir,
+      name,
+      price
+    })
+    .write();
+  await ctx.redirect("/admin?msg=Картинка успешно загружена");
 };
 
 // const validationProducts = (fields, files) => {
