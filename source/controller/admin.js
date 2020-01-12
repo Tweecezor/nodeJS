@@ -11,7 +11,9 @@ const platform = process.platform;
 
 module.exports.get = async (ctx, next) => {
   console.log(ctx.params.skill);
-  await ctx.render("pages/admin");
+  await ctx.render("pages/admin", {
+    msgskill: this.flash("msgskill")
+  });
 };
 
 module.exports.skills = async (ctx, next) => {
@@ -38,7 +40,7 @@ module.exports.skills = async (ctx, next) => {
   }).write();
   // ctx.request.flash("msgskill", "Данные успешно обновлены");
   this.flash("msgskill", "Данные успешно обновлены");
-  await ctx.redirect("/admin");
+  await ctx.redirect("/admin", { msgskill: "Данные успешно добавлены" });
 };
 
 module.exports.upload = async (ctx, next) => {
@@ -73,7 +75,7 @@ module.exports.upload = async (ctx, next) => {
       price
     })
     .write();
-  await ctx.redirect("/admin?msg=Картинка успешно загружена");
+  await ctx.redirect("/admin", { msg: "Файл успешно загружен" });
 };
 
 const validationSkills = fields => {

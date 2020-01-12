@@ -3,7 +3,7 @@ const Koa = require("koa");
 const fs = require("fs");
 const serve = require("koa-static");
 const Pug = require("koa-pug");
-const session = require("koa-session");
+const session = require("koa-generic-session");
 const flash = require("koa-connect-flash");
 
 // var Router = require("koa-router");
@@ -17,7 +17,7 @@ const pug = new Pug({
   viewPath: "./source/views",
   basedir: "./source/views"
 });
-
+app.keys = ["newest secret key", "older secret key"];
 app.use(serve(path.join(__dirname, "public")));
 app.use(
   session(
@@ -34,7 +34,7 @@ app.use(
     app
   )
 );
-app.use(flash());
+
 const router = require("./source/routes/index");
 app.use(router.routes());
 
