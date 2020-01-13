@@ -3,7 +3,8 @@ const Koa = require("koa");
 const fs = require("fs");
 const serve = require("koa-static");
 const Pug = require("koa-pug");
-const session = require("koa-generic-session");
+// const session = require("koa-generic-session");
+const session = require("koa-session");
 const flash = require("koa-connect-flash");
 
 // var Router = require("koa-router");
@@ -34,6 +35,7 @@ app.use(
     app
   )
 );
+app.use(flash());
 
 const router = require("./source/routes/index");
 app.use(router.routes());
