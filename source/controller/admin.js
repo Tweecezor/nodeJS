@@ -9,8 +9,8 @@ const platform = process.platform;
 module.exports.get = function(req, res) {
   res.render("pages/admin", {
     title: "About",
-    msgfile: req.query.msg,
-    msgskill: req.query.skill,
+    msgfile: req.flash("msg")[0],
+    msgskill: req.flash("skill")[0],
     skill: db.stores.file.store.skills
   });
 };
@@ -26,7 +26,8 @@ module.exports.skills = function(req, res, next) {
     }
     const valid = validationSkills(fields, files);
     if (valid.err) {
-      return res.redirect(`/?msg=${valid.status}`);
+      req.flash("skill", `${valid.status}`);
+      return res.redirect("/");
     }
     // console.log(fields);
 
@@ -49,26 +50,14 @@ module.exports.skills = function(req, res, next) {
       }
     };
     db.set("skills", skills);
-    // db.set("concerts", {
-    //   number: fields.concerts,
-    //   text: "Концертов отыграл"
-    // });
-    // db.set("cities", {
-    //   number: fields.cities,
-    //   text: "Максимальное число городов в туре"
-    // });
-    // db.set("years", {
-    //   number: fields.cities,
-    //   text: "Лет на сцене в качестве скрипача"
-    // });
     db.save();
-    res.redirect("/admin?skill=Данные успешно обновлены");
+    req.flash("skill", "Данные успешно обновлены");
+    res.redirect("/admin");
   });
 };
 
 module.exports.upload = function(req, res, next) {
   console.log("Внутри upload");
-  // console.log(dbProducts.stores.file.store);
   let form = new formidable.IncomingForm();
 
   let upload = path.join("./public", "upload");
@@ -82,7 +71,8 @@ module.exports.upload = function(req, res, next) {
     const valid = validationProducts(fields, files);
     if (valid.err) {
       fs.unlinkSync(files.photo.path);
-      return res.redirect(`/?msg=${valid.status}`);
+      req.flash("msg", `${valid.status}`);
+      return res.redirect(`/`);
     }
     const fileName = path.join(upload, files.photo.name);
     // console.log(fileName);
@@ -110,7 +100,8 @@ module.exports.upload = function(req, res, next) {
         price: fields.price
       });
       db.save();
-      res.redirect("/admin?msg=Картинка успешно загружена");
+      req.flash("msg", "Картинка успешно загружена");
+      res.redirect("/admin");
     });
   });
 };

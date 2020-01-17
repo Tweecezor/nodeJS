@@ -17,14 +17,16 @@ function getProductsFromDB() {
 module.exports.get = function(req, res) {
   res.render("pages/index", {
     pic: getProductsFromDB(),
-    skill: db.stores.file.store.skills
+    skill: db.stores.file.store.skills,
+    msgemail: req.flash("msgemail")
   });
 };
 module.exports.post = function(req, res) {
   if (!req.body.name || !req.body.email || !req.body.message) {
     // если что-либо не указано - сообщаем об этом
     // return res.json({ msg: "Все поля нужно заполнить!", status: "Error" });
-    return res.render("pages/index", { msgemail: "Все поля нужно заполнить" });
+    req.flash("msgemail", "Все поля нужно заполнить");
+    return res.redirect("/");
   }
   console.log("После проверки!!");
   const message = {
@@ -37,9 +39,6 @@ module.exports.post = function(req, res) {
     `
   };
   mailer(message);
-  res.render("pages/index", {
-    msgemail: "Сообщение успешно отправлено",
-    pic: getProductsFromDB(),
-    skill: db.stores.file.store.skills
-  });
+  req.flash("msgemail", "Сообщение успешно отправлено");
+  res.redirect("/");
 };

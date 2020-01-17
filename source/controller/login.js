@@ -4,7 +4,9 @@ module.exports.get = function(req, res) {
   if (req.session.isLoged) {
     res.redirect("/admin");
   }
-  res.render("pages/login");
+  res.render("pages/login", {
+    msgslogin: req.flash("msgslogin")[0]
+  });
 };
 
 module.exports.post = function(req, res) {
@@ -12,11 +14,12 @@ module.exports.post = function(req, res) {
   //   console.log(!req.body.password);
   //   console.log(!req.body.email);
   if (!req.body.email || !req.body.password) {
-    req.flash("test", "testing testing");
-    return res.render("pages/login", { msgslogin: "Ошибка заполните поля" });
+    req.flash("msgslogin", "Ошибка заполните поля");
+    return res.redirect("/login");
   }
   if (!validationLogin(req.body.email, req.body.password)) {
-    return res.render("pages/login", { msgslogin: "Неверные данные" });
+    req.flash("msgslogin", "Неверные данные");
+    return res.redirect("/login");
   } else {
     req.session.isLoged = true;
 
