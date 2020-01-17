@@ -4,7 +4,8 @@ const db = require("../models/koa-db");
 module.exports.get = async (ctx, next) => {
   await ctx.render("pages/index", {
     skill: db.get("skills").value(),
-    pic: db.get("products").value()
+    pic: db.get("products").value(),
+    msgemail: ctx.flash("msgemail")[0]
   });
 };
 module.exports.post = async (ctx, next) => {
@@ -15,9 +16,8 @@ module.exports.post = async (ctx, next) => {
   ) {
     // если что-либо не указано - сообщаем об этом
     // return res.json({ msg: "Все поля нужно заполнить!", status: "Error" });
-    return await ctx.render("pages/index", {
-      msgemail: "Все поля нужно заполнить"
-    });
+    ctx.flash("msgemail", "Все поля нужно заполнить");
+    return await ctx.redirect(`/`);
   }
   console.log("После проверки!!");
   const message = {
@@ -30,10 +30,6 @@ module.exports.post = async (ctx, next) => {
     `
   };
   mailer(message);
-  await ctx.render("pages/index", {
-    msgemail: "Сообщение успешно отправлено",
-    // pic: getProductsFromDB(),
-    skill: db.get("skills").value(),
-    pic: db.get("products").value()
-  });
+  ctx.flash("msgemail", "Сообщение успешно отправлено");
+  return await ctx.redirect(`/`);
 };

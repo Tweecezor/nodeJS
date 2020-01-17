@@ -4,17 +4,19 @@ module.exports.get = async (ctx, next) => {
   // if (req.session.isLoged) {
   //   res.redirect("/admin");
   // }
-  await ctx.render("pages/login");
+  await ctx.render("pages/login", {
+    msgslogin: ctx.flash("msgslogin")[0]
+  });
 };
 
 module.exports.post = async (ctx, next) => {
   if (!ctx.request.body.email || !ctx.request.body.password) {
-    return await ctx.render("pages/login", {
-      msgslogin: "Ошибка заполните поля"
-    });
+    ctx.flash("msgslogin", "Ошибка заполните поля");
+    return await ctx.redirect("/login");
   }
   if (!validationLogin(ctx.request.body.email, ctx.request.body.password)) {
-    return await ctx.render("pages/login", { msgslogin: "Неверные данные" });
+    ctx.flash("msgslogin", "Неверные данные");
+    return await ctx.redirect("/login");
   } else {
     // req.session.isLoged = true;
     ctx.session.isLoged = true;

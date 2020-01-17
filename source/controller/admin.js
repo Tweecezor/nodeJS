@@ -10,9 +10,11 @@ const rename = util.promisify(fs.rename);
 const platform = process.platform;
 
 module.exports.get = async (ctx, next) => {
-  console.log(ctx.params.skill);
+  // var status = ctx.flash("msgskillstatus")[0];
+  // console.log(status.two || false);
   await ctx.render("pages/admin", {
-    msgskill: this.flash("msgskill")
+    msgSkillStatus: ctx.flash("msgskillstatus")[0],
+    msgfile: ctx.flash("msgfile")[0]
   });
 };
 
@@ -20,7 +22,8 @@ module.exports.skills = async (ctx, next) => {
   console.log("внутри skills");
   const valid = validationSkills(ctx.request.body);
   if (valid.err) {
-    return await ctx.redirect(`/admin?msg=${valid.status}`);
+    ctx.flash("msgskillstatus", `${valid.status}`);
+    return await ctx.redirect(`/admin`);
   }
   db.set("skills.age", {
     number: ctx.request.body.age,
@@ -38,16 +41,20 @@ module.exports.skills = async (ctx, next) => {
     number: ctx.request.body.years,
     text: "Лет на сцене в качестве скрипача"
   }).write();
-  // ctx.request.flash("msgskill", "Данные успешно обновлены");
-  this.flash("msgskill", "Данные успешно обновлены");
-  await ctx.redirect("/admin", { msgskill: "Данные успешно добавлены" });
+  // ctx.flash("msgskill", "text");
+  ctx.flash("msgskillstatus", "Данные успешно обновлены");
+  // ctx.flash.set(" ctx.flash("msgskill", true, "text");");
+  // this.flash("msgskill", "Данные успешно обновлены");
+  await ctx.redirect("/admin");
 };
 
 module.exports.upload = async (ctx, next) => {
-  console.log("Внутри upload");
-  // console.log(ctx.request.body);
   var { name, price } = ctx.request.body;
-
+  const valid = validationProducts(ctx.request.body, ctx.request.body);
+  if (valid.err) {
+    ctx.flash("msgfile", `${valid.status}`);
+    return await ctx.redirect(`/admin`);
+  }
   let upload = path.join("./public", "uploads");
   const fileName = path.join(upload, ctx.request.files.photo.name);
   console.log(fileName);
@@ -75,21 +82,39 @@ module.exports.upload = async (ctx, next) => {
       price
     })
     .write();
-  await ctx.redirect("/admin", { msg: "Файл успешно загружен" });
+  ctx.flash("msgfile", "Товар добавлен");
+  await ctx.redirect("/admin");
 };
 
 const validationSkills = fields => {
+  let error = false;
   if (!fields.age) {
-    return { status: "Не указан возраст", err: true };
+    error = true;
   }
   if (!fields.concerts) {
-    return { status: "Не указано кол-во концертов", err: true };
+    error = true;
   }
   if (!fields.cities) {
-    return { status: "Не указано кол-во городов", err: true };
+    error = true;
   }
   if (!fields.years) {
-    return { status: "Не указано кол-во лет на сцене", err: true };
+    error = true;
+  }
+  if (error) {
+    return { status: "ЗАполните все поля", err: true };
+  } else return { status: "Ok", err: false };
+};
+const validationProducts = (file, fields) => {
+  // console.log(fields);
+  // console.log(files);
+  if (file.name === "" || file.size === 0) {
+    return { status: "Не загружена картинка!", err: true };
+  }
+  if (!fields.name) {
+    return { status: "Не указано описание товара!", err: true };
+  }
+  if (!fields.price) {
+    return { status: "Не указана цена товара!", err: true };
   }
   return { status: "Ok", err: false };
 };

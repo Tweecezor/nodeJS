@@ -5,7 +5,9 @@ const serve = require("koa-static");
 const Pug = require("koa-pug");
 // const session = require("koa-generic-session");
 const session = require("koa-session");
+// const flash = require("connect-flash");
 const flash = require("koa-connect-flash");
+// const flash = require("koa-flash-simple");
 
 // var Router = require("koa-router");
 // const router = new Router();
