@@ -1,42 +1,50 @@
-var express = require("express");
-var path = require("path");
-var app = express();
-var bodyParser = require("body-parser");
-var session = require("express-session");
-var fs = require("fs");
-var flash = require("connect-flash");
-
-app.set("views", path.join(__dirname, "source", "views"));
-app.set("view engine", "pug");
+const express = require("express");
+const path = require("path");
+const app = express();
+const fs = require("fs");
+const session = require("express-session");
+// const router = express.Router();
+const bodyParser = require("body-parser");
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+// router.get("/", (req, res, next) => {
+//   res.render("index.html");
+// });
+// router.post("/api/login", (req, res, next) => {
+//   console.log("hello");
+// });
 app.use(
   session({
-    secret: "mySecretWord",
-    key: "sessionkey",
+    secret: "loftSecret",
     cookie: {
       path: "/",
       httpOnly: true,
-      maxAge: 5 * 60 * 1000
+      maxAge: 10 * 60 * 1000
     },
     saveUninitialized: false,
     resave: false
   })
 );
-app.use(flash());
 
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "build"))); //статика всегда перед раутами
 
-app.use("/", require("./source/routes/index"));
+app.use("/", require(path.join(__dirname, "server", "api"))); //рауты последний промежуточное ПО
 
-let upload = path.join("./public", "upload");
+app.get("*", (req, res) => {
+  res.send(
+    fs.readFileSync(path.resolve(path.join("build", "index.html")), "utf8")
+  );
+});
+let upload = path.join("./build", "images", "upload");
 
 if (!fs.existsSync(upload)) {
-  fs.mkdirSync(upload);
+  console.log("не существует");
+  fs.mkdirSync("./build/images");
+  fs.mkdirSync("./build/images/upload");
 }
 
-const server = app.listen(3001, function() {
-  console.log("Сервер был запущен");
+const server = app.listen(3000, () => {
+  console.log("server is ready");
 });
