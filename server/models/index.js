@@ -68,5 +68,24 @@ const userSchema = new Schema({
 userSchema.plugin(autoincrement, { field: "_id", collection: "users" });
 
 const User = mongoose.model("user", userSchema);
-module.exports = User;
-module.exports = User;
+
+const newsScheme = new Schema({
+  id: String,
+  created_at: Date,
+  text: String,
+  title: String,
+  user: {
+    firstName: String,
+    id: String,
+    image: String,
+    middleName: String,
+    surName: String,
+    username: String
+  }
+});
+
+const News = mongoose.model("news", newsScheme);
+newsScheme.plugin(autoincrement, { field: "_id", collection: "news" });
+
+module.exports.user = User;
+module.exports.news = News;

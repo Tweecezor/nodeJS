@@ -5,6 +5,12 @@ const fs = require("fs");
 const session = require("express-session");
 // const router = express.Router();
 const bodyParser = require("body-parser");
+const chat = require("./server/chat");
+const http = require("http");
+const server = http.createServer(app);
+chat(server);
+
+//
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -34,7 +40,7 @@ app.use("/", require(path.join(__dirname, "server", "api"))); //рауты по�
 
 app.get("*", (req, res) => {
   res.send(
-    fs.readFileSync(path.resolve(path.join("build", "index.html")), "utf8")
+    fs.readFileSync(path.resolve(path.join("public", "index.html")), "utf8")
   );
 });
 let upload = path.join("./build", "images", "upload");
@@ -45,6 +51,6 @@ if (!fs.existsSync(upload)) {
   fs.mkdirSync("./build/images/upload");
 }
 
-const server = app.listen(3000, () => {
+server.listen(3000, () => {
   console.log("server is ready");
 });

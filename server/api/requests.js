@@ -10,6 +10,8 @@ const util = require("util");
 const rename = util.promisify(fs.rename);
 const platform = process.platform;
 
+// локальная БД mongodb://localhost:27017/projectDB
+
 var jwt = require("jsonwebtoken");
 
 var passport = require("passport");
@@ -18,7 +20,9 @@ var passportJWT = require("passport-jwt");
 var ExtractJwt = passportJWT.ExtractJwt;
 var JwtStrategy = passportJWT.Strategy;
 
-const User = require("../models");
+const User = require("../models").user;
+const News = require("../models").news;
+console.log(User);
 
 var jwtOptions = {
   jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -27,10 +31,13 @@ var jwtOptions = {
 
 var strategy = new JwtStrategy(jwtOptions, async function(jwt_payload, next) {
   mongoose
-    .connect("mongodb://localhost:27017/projectDB", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    .connect(
+      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    )
     .then(console.log("connected"))
     .catch(err => console.log(err));
   console.log("payload received", jwt_payload);
@@ -46,12 +53,16 @@ var strategy = new JwtStrategy(jwtOptions, async function(jwt_payload, next) {
 
 passport.use(strategy);
 
+//Ругистрация в системе
 router.post("/api/registration", async (req, res, next) => {
   await mongoose
-    .connect("mongodb://localhost:27017/projectDB", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    .connect(
+      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    )
     .then(console.log("connected"))
     .catch(err => console.log(err));
   // console.log(await helper.encryptPassword(req.body.password));
@@ -90,16 +101,19 @@ router.post("/api/registration", async (req, res, next) => {
   // console.log(user);
   res.send(user);
 });
-
+//Логирование в систему
 router.post("/api/login", async (req, res, next) => {
   // if (!req.body.username && !req.body.password) {
   //   return res.status(401).json({ message: "Заполните поля" });
   // }
   mongoose
-    .connect("mongodb://localhost:27017/projectDB", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    .connect(
+      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    )
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   var user = await User.find({ username: req.body.username });
@@ -107,15 +121,16 @@ router.post("/api/login", async (req, res, next) => {
   if (!user) {
     res.status(401).send({ message: "Пользователь не найден" });
   }
-  // console.log(req.body.password);
-  // console.log(user.password);
-  // console.log(helper.comparePassword(req.body.password, user.password));
+
   var match = await helper.comparePassword(req.body.password, user.password);
   // console.log(match);
   if (match) {
     var payload = { id: user.id };
     var token = jwt.sign(payload, jwtOptions.secretOrKey);
-    var refreshToken = jwt.sign(payload, jwtOptions.secretOrKey);
+    var refreshToken = jwt.sign(
+      { id: user.id, name: user.username },
+      jwtOptions.secretOrKey
+    );
     await User.findByIdAndUpdate(user.id, {
       accessToken: token,
       refreshToken: refreshToken,
@@ -131,32 +146,22 @@ router.post("/api/login", async (req, res, next) => {
     mongoose.disconnect();
     res.status(401).send({ message: "passwords did not match" });
   }
-
-  // console.log(user.password);
-  // console.log(req.body.password);
-  // if (user) {
-  //   if (user.password !== req.body.password) {
-  //     return res.status(401).json({ message: "Неверный пароль" });
-  //   }
-  //   return res.send(user);
-  // } else {
-  //   return res
-  //     .status(401)
-  //     .json({ message: "Такой пользователь не зарегистрирован" });
-  // }
 });
 
+//Вход при наличии токена
 router.get("/api/profile", async function(req, res) {
   mongoose
-    .connect("mongodb://localhost:27017/projectDB", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    .connect(
+      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    )
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
-
   let authorization = req.headers.authorization;
-  // console.log(authorization);
+  console.log(authorization);
   var decoded = jwt.verify(authorization, jwtOptions.secretOrKey);
   // console.log(decoded);
   var userId = decoded.id;
@@ -165,15 +170,20 @@ router.get("/api/profile", async function(req, res) {
   res.send(user);
 });
 
+//Обновление данных профиля
 router.patch("/api/profile", async function(req, res) {
   mongoose
-    .connect("mongodb://localhost:27017/projectDB", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    .connect(
+      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    )
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   let authorization = req.headers.authorization;
+  console.log(authorization);
   var decoded = jwt.verify(authorization, jwtOptions.secretOrKey);
   var userId = decoded.id;
 
@@ -316,12 +326,17 @@ router.patch("/api/profile", async function(req, res) {
   });
 });
 
+//Удаления юзера по ID
+
 router.delete("/api/users/:id", async function(req, res, next) {
   mongoose
-    .connect("mongodb://localhost:27017/projectDB", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    .connect(
+      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    )
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   User.deleteOne({ id: req.params["id"] }, function(err, doc) {
@@ -331,12 +346,16 @@ router.delete("/api/users/:id", async function(req, res, next) {
   });
 });
 
+//Получение всех юзеров
 router.get("/api/users", (req, res, next) => {
   mongoose
-    .connect("mongodb://localhost:27017/projectDB", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
+    .connect(
+      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    )
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   User.find()
@@ -349,6 +368,134 @@ router.get("/api/users", (req, res, next) => {
       mongoose.disconnect();
       return res.status(401).send({ message: err });
     });
+});
+
+// Получение всех новостей
+router.get("api/news", function(req, res, next) {
+  mongoose
+    .connect(
+      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    )
+    .then(console.log("connected to db"))
+    .catch(err => console.log(err));
+  News.find()
+    .then(function(doc) {
+      mongoose.disconnect();
+      res.send(doc);
+    })
+    .catch(function(err) {
+      mongoose.disconnect();
+      return res.status(401).send({ message: err });
+    });
+});
+
+router.post("api/news", async function(req, res, next) {
+  mongoose
+    .connect(
+      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true
+      }
+    )
+    .then(console.log("connected to db"))
+    .catch(err => console.log(err));
+  let authorization = req.headers.authorization;
+  console.log(authorization);
+  var decoded = jwt.verify(authorization, jwtOptions.secretOrKey);
+  var userId = decoded.id;
+  console.log(userId);
+  var currentUser = await User.findById(userId);
+  const news = new News({
+    created_at: Date.now(),
+    text: req.body.text,
+    title: req.body.title,
+    user: {
+      firstName: currentUser.firstName,
+      id: currentUser.id,
+      image: currentUser.image,
+      middleName: currentUser.middleName,
+      surName: currentUser.surName,
+      username: currentUser.username
+    }
+  });
+  await news.save();
+  News.find()
+    .then(doc => res.send(doc))
+    .catch(err => {
+      res.status(401).send({ message: err });
+    });
+});
+
+router.patch("/api/news/:id", (req, res, next) => {
+  News.findOneAndUpdate(
+    { id: req.params["id"] },
+    {
+      text: req.body.text,
+      title: req.body.title
+    },
+    function(err, doc) {
+      if (err) return res.status(401).send({ message: err });
+    }
+  ).then(() => {
+    News.find()
+      .then(function(doc) {
+        res.send(doc);
+      })
+      .catch(function(err) {
+        return res.status(401).jsosendn({ message: err });
+      });
+  });
+});
+
+router.delete("/api/news/:id", (req, res, next) => {
+  console.log(req.params["id"]);
+  News.deleteOne({ id: req.params["id"] }, function(err, doc) {
+    if (err) return res.status(401).send({ message: err });
+  }).then(function(err, doc) {
+    News.find()
+      .then(function(doc) {
+        res.send(doc);
+      })
+      .catch(function(err) {
+        return res.status(401).send({ message: err });
+      })
+      .catch(function(err) {
+        return res.status(401).send({ message: err });
+      });
+  });
+});
+
+router.patch("/api/users/:id/permission", (req, res, next) => {
+  User.findOne({ id: req.params["id"] }, async function(err, doc) {
+    if (err) return res.status(401).send({ message: err });
+    doc.permission.chat.C = req.body.permission.chat.C;
+    doc.permission.chat.R = req.body.permission.chat.R;
+    doc.permission.chat.U = req.body.permission.chat.U;
+    doc.permission.chat.D = req.body.permission.chat.D;
+
+    doc.permission.news.C = req.body.permission.news.C;
+    doc.permission.news.R = req.body.permission.news.R;
+    doc.permission.news.U = req.body.permission.news.U;
+    doc.permission.news.D = req.body.permission.news.D;
+
+    doc.permission.settings.C = req.body.permission.settings.C;
+    doc.permission.settings.R = req.body.permission.settings.R;
+    doc.permission.settings.U = req.body.permission.settings.U;
+    doc.permission.settings.D = req.body.permission.settings.D;
+    await doc.save();
+    User.find()
+      .then(function(inpdoc) {
+        res.send(inpdoc);
+      })
+      .catch(function(err) {
+        return res.status(401).json({ message: err });
+      });
+  });
 });
 
 module.exports = router;
