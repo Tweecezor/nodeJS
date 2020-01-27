@@ -1,7 +1,7 @@
-import axios from 'axios';
-import { tokensSelector, refreshTokenRequest, logout } from '../store/auth';
-import { openNotification } from '../store/notifications';
-const baseURL = 'http://localhost:3000/api/';
+import axios from "axios";
+import { tokensSelector, refreshTokenRequest, logout } from "../store/auth";
+import { openNotification } from "../store/notifications";
+const baseURL = "/api/";
 const instance = axios.create({ baseURL });
 
 const waitQueue = [];
@@ -18,7 +18,6 @@ const request = ({
   dispatch = () => {}
 }) =>
   new Promise((resolve, reject) => {
-    
     const {
       accessToken,
       accessTokenExpiredAt,
@@ -28,11 +27,8 @@ const request = ({
     // request handler
     const requestFunc = ({ url, method, headers, data, resolve, reject }) => {
       if (!isWithoutToken) {
-        const {
-          accessToken,
-          refreshToken,
-        } = tokensSelector(getState());
-        (headers['Authorization'] = isRefresh ? refreshToken : accessToken);
+        const { accessToken, refreshToken } = tokensSelector(getState());
+        headers["Authorization"] = isRefresh ? refreshToken : accessToken;
       }
 
       return instance({ url, method, headers, data })
@@ -43,33 +39,33 @@ const request = ({
           if (error.response) {
             const status = error.response.status || 404;
             const errorResponse = error.response.data;
-            console.group('Error from: ' + url);
-            console.info('Status: ' + status);
+            console.group("Error from: " + url);
+            console.info("Status: " + status);
             console.dir(errorResponse);
             console.groupEnd();
 
             switch (status) {
               case 401:
               case 403:
-                dispatch(logout())
+                dispatch(logout());
                 return reject(errorResponse);
               case 500:
               case 502:
               case 503:
                 dispatch(
                   openNotification({
-                    variant: 'error',
+                    variant: "error",
                     text: `${status}!\nSomething is wrong))`
                   })
                 );
-                return reject({ detail: 'Unknown error' });
+                return reject({ detail: "Unknown error" });
               default:
                 return reject(errorResponse);
             }
           } else {
             dispatch(
               openNotification({
-                variant: 'error',
+                variant: "error",
                 text: `Error!!\n${error.message}`
               })
             );
@@ -106,9 +102,9 @@ const request = ({
           })
           .catch(() => {
             // by default in error - logout user
-            dispatch(logout())
+            dispatch(logout());
             // eslint-disable-next-line
-            reject({ detail: 'Refresh token error' });
+            reject({ detail: "Refresh token error" });
           });
       } else if (isRefresh) {
         // if has been called refresh method
@@ -116,9 +112,9 @@ const request = ({
       }
     } else if (isRefreshExpired && !isWithoutToken) {
       // if refresh is expired - just logout
-      dispatch(logout())
+      dispatch(logout());
       // eslint-disable-next-line
-      reject({ detail: 'Refresh token is expired' });
+      reject({ detail: "Refresh token is expired" });
     } else {
       // by default
       requestFunc({ url, method, data, headers, resolve, reject });

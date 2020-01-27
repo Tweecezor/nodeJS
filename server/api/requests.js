@@ -31,13 +31,10 @@ var jwtOptions = {
 
 var strategy = new JwtStrategy(jwtOptions, async function(jwt_payload, next) {
   mongoose
-    .connect(
-      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    )
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
     .then(console.log("connected"))
     .catch(err => console.log(err));
   console.log("payload received", jwt_payload);
@@ -56,13 +53,10 @@ passport.use(strategy);
 //Ругистрация в системе
 router.post("/api/registration", async (req, res, next) => {
   await mongoose
-    .connect(
-      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    )
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
     .then(console.log("connected"))
     .catch(err => console.log(err));
   // console.log(await helper.encryptPassword(req.body.password));
@@ -107,13 +101,10 @@ router.post("/api/login", async (req, res, next) => {
   //   return res.status(401).json({ message: "Заполните поля" });
   // }
   mongoose
-    .connect(
-      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    )
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   var user = await User.find({ username: req.body.username });
@@ -151,13 +142,10 @@ router.post("/api/login", async (req, res, next) => {
 //Вход при наличии токена
 router.get("/api/profile", async function(req, res) {
   mongoose
-    .connect(
-      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    )
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   let authorization = req.headers.authorization;
@@ -173,13 +161,10 @@ router.get("/api/profile", async function(req, res) {
 //Обновление данных профиля
 router.patch("/api/profile", async function(req, res) {
   mongoose
-    .connect(
-      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    )
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   let authorization = req.headers.authorization;
@@ -330,13 +315,10 @@ router.patch("/api/profile", async function(req, res) {
 
 router.delete("/api/users/:id", async function(req, res, next) {
   mongoose
-    .connect(
-      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    )
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   User.deleteOne({ id: req.params["id"] }, function(err, doc) {
@@ -349,13 +331,10 @@ router.delete("/api/users/:id", async function(req, res, next) {
 //Получение всех юзеров
 router.get("/api/users", (req, res, next) => {
   mongoose
-    .connect(
-      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    )
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   User.find()
@@ -373,13 +352,10 @@ router.get("/api/users", (req, res, next) => {
 // Получение всех новостей
 router.get("api/news", function(req, res, next) {
   mongoose
-    .connect(
-      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    )
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   News.find()
@@ -395,13 +371,10 @@ router.get("api/news", function(req, res, next) {
 
 router.post("api/news", async function(req, res, next) {
   mongoose
-    .connect(
-      "mongodb+srv://LoftTweecz:tweeczLoft@loftnodeproject-jdehe.mongodb.net/test?retryWrites=true&w=majority",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true
-      }
-    )
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
     .then(console.log("connected to db"))
     .catch(err => console.log(err));
   let authorization = req.headers.authorization;
@@ -432,6 +405,13 @@ router.post("api/news", async function(req, res, next) {
 });
 
 router.patch("/api/news/:id", (req, res, next) => {
+  mongoose
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
+    .then(console.log("connected to db"))
+    .catch(err => console.log(err));
   News.findOneAndUpdate(
     { id: req.params["id"] },
     {
@@ -453,6 +433,13 @@ router.patch("/api/news/:id", (req, res, next) => {
 });
 
 router.delete("/api/news/:id", (req, res, next) => {
+  mongoose
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
+    .then(console.log("connected to db"))
+    .catch(err => console.log(err));
   console.log(req.params["id"]);
   News.deleteOne({ id: req.params["id"] }, function(err, doc) {
     if (err) return res.status(401).send({ message: err });
@@ -471,6 +458,13 @@ router.delete("/api/news/:id", (req, res, next) => {
 });
 
 router.patch("/api/users/:id/permission", (req, res, next) => {
+  mongoose
+    .connect(helper.mongoURL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    })
+    .then(console.log("connected to db"))
+    .catch(err => console.log(err));
   User.findOne({ id: req.params["id"] }, async function(err, doc) {
     if (err) return res.status(401).send({ message: err });
     doc.permission.chat.C = req.body.permission.chat.C;

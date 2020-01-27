@@ -8,3 +8,5 @@ exports.comparePassword = async (password, hash) => {
   return match;
 };
 exports.uploadDir = path.join("./build", "images", "upload");
+exports.mongoURL =
+  "mongodb+srv://twcz:LoftLoft@cluster01-fcul6.mongodb.net/test?retryWrites=true&w=majority";
