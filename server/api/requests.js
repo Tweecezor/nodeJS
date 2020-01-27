@@ -11,6 +11,13 @@ const rename = util.promisify(fs.rename);
 const platform = process.platform;
 
 // локальная БД mongodb://localhost:27017/projectDB
+mongoose
+  .connect(helper.mongoURL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(console.log("connected"))
+  .catch(err => console.log(err));
 
 var jwt = require("jsonwebtoken");
 
@@ -30,13 +37,13 @@ var jwtOptions = {
 };
 
 var strategy = new JwtStrategy(jwtOptions, async function(jwt_payload, next) {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected"))
-    .catch(err => console.log(err));
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected"))
+  //   .catch(err => console.log(err));
   console.log("payload received", jwt_payload);
   // usually this would be a database call:
   var userid = jwt_payload.id;
@@ -52,13 +59,13 @@ passport.use(strategy);
 
 //Ругистрация в системе
 router.post("/api/registration", async (req, res, next) => {
-  await mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected"))
-    .catch(err => console.log(err));
+  // await mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected"))
+  //   .catch(err => console.log(err));
   // console.log(await helper.encryptPassword(req.body.password));
   const user = new User({
     firstName: req.body.firstName,
@@ -68,7 +75,7 @@ router.post("/api/registration", async (req, res, next) => {
     password: await helper.encryptPassword(req.body.password),
     image: "",
     permission: {
-      chat: { C: false, R: true, U: true, D: true },
+      chat: { C: true, R: true, U: true, D: true },
       news: { C: false, R: true, U: true, D: false },
       settings: { C: false, R: false, U: false, D: false }
       // admin\/
@@ -85,12 +92,12 @@ router.post("/api/registration", async (req, res, next) => {
   await user
     .save()
     .then(doc => {
-      mongoose.disconnect();
+      // mongoose.disconnect();
       return doc;
     })
     .catch(function(err) {
       console.log(err);
-      mongoose.disconnect();
+      // mongoose.disconnect();
     });
   // console.log(user);
   res.send(user);
@@ -100,13 +107,13 @@ router.post("/api/login", async (req, res, next) => {
   // if (!req.body.username && !req.body.password) {
   //   return res.status(401).json({ message: "Заполните поля" });
   // }
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected to db"))
+  //   .catch(err => console.log(err));
   var user = await User.find({ username: req.body.username });
   user = user[0];
   if (!user) {
@@ -130,24 +137,24 @@ router.post("/api/login", async (req, res, next) => {
     });
     var authUser = await User.findById(user.id);
     // console.log(authUser);
-    mongoose.disconnect();
+    // mongoose.disconnect();
     res.send(authUser);
     // res.json({ message: "ok", token: token });
   } else {
-    mongoose.disconnect();
+    // mongoose.disconnect();
     res.status(401).send({ message: "passwords did not match" });
   }
 });
 
 //Вход при наличии токена
 router.get("/api/profile", async function(req, res) {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected to db"))
+  //   .catch(err => console.log(err));
   let authorization = req.headers.authorization;
   console.log(authorization);
   var decoded = jwt.verify(authorization, jwtOptions.secretOrKey);
@@ -160,13 +167,13 @@ router.get("/api/profile", async function(req, res) {
 
 //Обновление данных профиля
 router.patch("/api/profile", async function(req, res) {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected to db"))
+  //   .catch(err => console.log(err));
   let authorization = req.headers.authorization;
   console.log(authorization);
   var decoded = jwt.verify(authorization, jwtOptions.secretOrKey);
@@ -248,7 +255,7 @@ router.patch("/api/profile", async function(req, res) {
         );
         await User.findById(userId, function(err, person) {
           console.log(person);
-          mongoose.disconnect();
+          // mongoose.disconnect();
           res.send(person);
         });
         // User.findByIdAndUpdate(
@@ -286,7 +293,7 @@ router.patch("/api/profile", async function(req, res) {
           });
         } else {
           console.log("не тот пароль ");
-          mongoose.disconnect();
+          // mongoose.disconnect();
           return res.status(401).send({ message: "Старый пароль неверный" });
         }
       } else {
@@ -303,7 +310,7 @@ router.patch("/api/profile", async function(req, res) {
         );
         await User.findById(userId, function(err, person) {
           console.log(person);
-          mongoose.disconnect();
+          // mongoose.disconnect();
           res.send(person);
         });
       }
@@ -314,69 +321,69 @@ router.patch("/api/profile", async function(req, res) {
 //Удаления юзера по ID
 
 router.delete("/api/users/:id", async function(req, res, next) {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected to db"))
+  //   .catch(err => console.log(err));
   User.deleteOne({ id: req.params["id"] }, function(err, doc) {
     if (err) return res.status(401).send({ message: err });
-    mongoose.disconnect();
+    // mongoose.disconnect();
     res.send(doc);
   });
 });
 
 //Получение всех юзеров
 router.get("/api/users", (req, res, next) => {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected to db"))
+  //   .catch(err => console.log(err));
   User.find()
     .then(function(doc) {
       console.log(doc);
-      mongoose.disconnect();
+      // mongoose.disconnect();
       res.send(doc);
     })
     .catch(function(err) {
-      mongoose.disconnect();
+      // mongoose.disconnect();
       return res.status(401).send({ message: err });
     });
 });
 
 // Получение всех новостей
 router.get("api/news", function(req, res, next) {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected to db"))
+  //   .catch(err => console.log(err));
   News.find()
     .then(function(doc) {
-      mongoose.disconnect();
+      // mongoose.disconnect();
       res.send(doc);
     })
     .catch(function(err) {
-      mongoose.disconnect();
+      // mongoose.disconnect();
       return res.status(401).send({ message: err });
     });
 });
 
 router.post("api/news", async function(req, res, next) {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected to db"))
+  //   .catch(err => console.log(err));
   let authorization = req.headers.authorization;
   console.log(authorization);
   var decoded = jwt.verify(authorization, jwtOptions.secretOrKey);
@@ -405,13 +412,13 @@ router.post("api/news", async function(req, res, next) {
 });
 
 router.patch("/api/news/:id", (req, res, next) => {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected to db"))
+  //   .catch(err => console.log(err));
   News.findOneAndUpdate(
     { id: req.params["id"] },
     {
@@ -433,14 +440,14 @@ router.patch("/api/news/:id", (req, res, next) => {
 });
 
 router.delete("/api/news/:id", (req, res, next) => {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
-  console.log(req.params["id"]);
+  // mongoose
+  //   .connect(helper.mongoURL, {
+  //     useNewUrlParser: true,
+  //     useUnifiedTopology: true
+  //   })
+  //   .then(console.log("connected to db"))
+  //   .catch(err => console.log(err));
+
   News.deleteOne({ id: req.params["id"] }, function(err, doc) {
     if (err) return res.status(401).send({ message: err });
   }).then(function(err, doc) {
@@ -458,13 +465,6 @@ router.delete("/api/news/:id", (req, res, next) => {
 });
 
 router.patch("/api/users/:id/permission", (req, res, next) => {
-  mongoose
-    .connect(helper.mongoURL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    })
-    .then(console.log("connected to db"))
-    .catch(err => console.log(err));
   User.findOne({ id: req.params["id"] }, async function(err, doc) {
     if (err) return res.status(401).send({ message: err });
     doc.permission.chat.C = req.body.permission.chat.C;
