@@ -9,6 +9,7 @@ const fs = require("fs");
 const util = require("util");
 const rename = util.promisify(fs.rename);
 const platform = process.platform;
+const uuid = require("uuid");
 
 // локальная БД mongodb://localhost:27017/projectDB
 mongoose
@@ -68,6 +69,7 @@ router.post("/api/registration", async (req, res, next) => {
   //   .catch(err => console.log(err));
   // console.log(await helper.encryptPassword(req.body.password));
   const user = new User({
+    id: uuid(),
     firstName: req.body.firstName,
     surName: req.body.surName,
     middleName: req.body.middleName,
@@ -75,14 +77,14 @@ router.post("/api/registration", async (req, res, next) => {
     password: await helper.encryptPassword(req.body.password),
     image: "",
     permission: {
-      chat: { C: true, R: true, U: true, D: true },
-      news: { C: false, R: true, U: true, D: false },
-      settings: { C: false, R: false, U: false, D: false }
+      // chat: { C: true, R: true, U: true, D: true },
+      // news: { C: false, R: true, U: true, D: false },
+      // settings: { C: false, R: false, U: false, D: false }
       // admin\/
 
-      // chat: { C: true, R: true, U: true, D: true },
-      // news: { C: true, R: true, U: true, D: true },
-      // settings: { C: true, R: true, U: true, D: true }
+      chat: { C: true, R: true, U: true, D: true },
+      news: { C: true, R: true, U: true, D: true },
+      settings: { C: true, R: true, U: true, D: true }
     },
     accessToken: "",
     refreshToken: "",
@@ -119,24 +121,29 @@ router.post("/api/login", async (req, res, next) => {
   if (!user) {
     res.status(401).send({ message: "Пользователь не найден" });
   }
+  console.log(user);
 
   var match = await helper.comparePassword(req.body.password, user.password);
   // console.log(match);
   if (match) {
-    var payload = { id: user.id };
+    console.log("----");
+    console.log(user._id);
+    console.log(user.id);
+    console.log("-------");
+    var payload = { id: user._id };
     var token = jwt.sign(payload, jwtOptions.secretOrKey);
     var refreshToken = jwt.sign(
       { id: user.id, name: user.username },
       jwtOptions.secretOrKey
     );
-    await User.findByIdAndUpdate(user.id, {
+    await User.findByIdAndUpdate(user._id, {
       accessToken: token,
       refreshToken: refreshToken,
       accessTokenExpiredAt: Date.now() + 60 * 60 * 1000,
       refreshTokenExpiredAt: Date.now() + 60 * 60 * 1000 * 10
     });
-    var authUser = await User.findById(user.id);
-    // console.log(authUser);
+    var authUser = await User.findById(user._id);
+    console.log(authUser);
     // mongoose.disconnect();
     res.send(authUser);
     // res.json({ message: "ok", token: token });
@@ -357,7 +364,7 @@ router.get("/api/users", (req, res, next) => {
 });
 
 // Получение всех новостей
-router.get("api/news", function(req, res, next) {
+router.get("/api/news", function(req, res, next) {
   // mongoose
   //   .connect(helper.mongoURL, {
   //     useNewUrlParser: true,
@@ -368,7 +375,8 @@ router.get("api/news", function(req, res, next) {
   News.find()
     .then(function(doc) {
       // mongoose.disconnect();
-      res.send(doc);
+      // console.log(doc.splice(0, 1));
+      res.send(doc.slice(1));
     })
     .catch(function(err) {
       // mongoose.disconnect();
@@ -376,7 +384,7 @@ router.get("api/news", function(req, res, next) {
     });
 });
 
-router.post("api/news", async function(req, res, next) {
+router.post("/api/news", async function(req, res, next) {
   // mongoose
   //   .connect(helper.mongoURL, {
   //     useNewUrlParser: true,
@@ -390,13 +398,15 @@ router.post("api/news", async function(req, res, next) {
   var userId = decoded.id;
   console.log(userId);
   var currentUser = await User.findById(userId);
+  // console.log(currentUser);
   const news = new News({
+    id: uuid(),
     created_at: Date.now(),
     text: req.body.text,
     title: req.body.title,
     user: {
       firstName: currentUser.firstName,
-      id: currentUser.id,
+      id: currentUser._id,
       image: currentUser.image,
       middleName: currentUser.middleName,
       surName: currentUser.surName,
@@ -405,7 +415,11 @@ router.post("api/news", async function(req, res, next) {
   });
   await news.save();
   News.find()
-    .then(doc => res.send(doc))
+    .then(doc => {
+      // console.log(doc);
+      // console.log(doc.slice(1));
+      res.send(doc.slice(1));
+    })
     .catch(err => {
       res.status(401).send({ message: err });
     });
@@ -419,6 +433,7 @@ router.patch("/api/news/:id", (req, res, next) => {
   //   })
   //   .then(console.log("connected to db"))
   //   .catch(err => console.log(err));
+  console.log(req.params["id"]);
   News.findOneAndUpdate(
     { id: req.params["id"] },
     {
@@ -431,15 +446,15 @@ router.patch("/api/news/:id", (req, res, next) => {
   ).then(() => {
     News.find()
       .then(function(doc) {
-        res.send(doc);
+        res.send(doc.slice(1));
       })
       .catch(function(err) {
-        return res.status(401).jsosendn({ message: err });
+        return res.status(401).send({ message: err });
       });
   });
 });
 
-router.delete("/api/news/:id", (req, res, next) => {
+router.delete("/api/news/:id", async (req, res, next) => {
   // mongoose
   //   .connect(helper.mongoURL, {
   //     useNewUrlParser: true,
@@ -447,13 +462,15 @@ router.delete("/api/news/:id", (req, res, next) => {
   //   })
   //   .then(console.log("connected to db"))
   //   .catch(err => console.log(err));
-
+  // console.log(req.params["id"]);
+  // var currentNews = await News.find({ id: req.params["id"] });
+  // console.log(currentNews);
   News.deleteOne({ id: req.params["id"] }, function(err, doc) {
     if (err) return res.status(401).send({ message: err });
   }).then(function(err, doc) {
     News.find()
       .then(function(doc) {
-        res.send(doc);
+        res.send(doc.slice(1));
       })
       .catch(function(err) {
         return res.status(401).send({ message: err });
@@ -462,6 +479,30 @@ router.delete("/api/news/:id", (req, res, next) => {
         return res.status(401).send({ message: err });
       });
   });
+});
+
+router.post("/api/refresh-token", async function(req, res) {
+  let authorization = req.headers.authorization;
+  try {
+    var decoded = jwt.verify(authorization, jwtOptions.secretOrKey);
+  } catch (err) {
+    return res.status(401).json({ message: err });
+  }
+  let userId = decoded.id;
+  let user = await User.find(userId);
+  var payload = { id: userId, username: user.username };
+  const accessToken = jwt.sign(payload, jwtOptions.secretOrKey);
+  const refreshToken = jwt.sign(payload, jwtOptions.secretOrKey);
+
+  await User.findByIdAndUpdate(user._id, {
+    accessToken: accessToken,
+    refreshToken: refreshToken,
+    accessTokenExpiredAt: Date.now() + 60 * 60 * 1000,
+    refreshTokenExpiredAt: Date.now() + 60 * 60 * 1000 * 10
+  });
+  var authUser = await User.findById(user._id);
+  console.log(authUser);
+  res.send(authUser);
 });
 
 router.patch("/api/users/:id/permission", (req, res, next) => {
@@ -483,8 +524,8 @@ router.patch("/api/users/:id/permission", (req, res, next) => {
     doc.permission.settings.D = req.body.permission.settings.D;
     await doc.save();
     User.find()
-      .then(function(inpdoc) {
-        res.send(inpdoc);
+      .then(function(newdoc) {
+        res.send(newdoc.slice(1));
       })
       .catch(function(err) {
         return res.status(401).json({ message: err });

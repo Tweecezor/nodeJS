@@ -5,6 +5,10 @@ const autoincrement = require("mongoose-easy-auto-increment");
 mongoose.Promise = global.Promise;
 
 const userSchema = new Schema({
+  id: {
+    type: String,
+    required: true
+  },
   username: {
     type: String,
     required: true,
@@ -64,6 +68,7 @@ const userSchema = new Schema({
   },
   accessTokenExpiredAt: Date,
   refreshTokenExpiredAt: Date
+  // id: String
 });
 userSchema.plugin(autoincrement, { field: "_id", collection: "users" });
 
@@ -83,9 +88,9 @@ const newsScheme = new Schema({
     username: String
   }
 });
+newsScheme.plugin(autoincrement, { field: "_id", collection: "news" });
 
 const News = mongoose.model("news", newsScheme);
-newsScheme.plugin(autoincrement, { field: "_id", collection: "news" });
 
 module.exports.user = User;
 module.exports.news = News;
